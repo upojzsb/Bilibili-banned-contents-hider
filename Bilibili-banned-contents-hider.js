@@ -6,6 +6,7 @@
 // @author       UPO-JZSB
 // @match        *://*.bilibili.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
+// @license      GPL-3.0
 // ==/UserScript==
 var delay=1000;//Delay delay ms
 
