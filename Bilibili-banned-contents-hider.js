@@ -1,8 +1,10 @@
 // ==UserScript==
 // @name         Bilibili-banned-contents-hider
+// @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
 // @version      V0.2.1
-// @description  Hide banned users's contents on Bilibili. Bilibili may push contents created from the users in your blacklist, this script is used to remove those contents.
+// @description  Hide banned users' contents on Bilibili. Bilibili may push contents created from the users in your blacklist, this script is used to remove those contents.
+// @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容
 // @author       UPO-JZSB
 // @match        *://*.bilibili.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
