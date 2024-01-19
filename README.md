@@ -1,5 +1,13 @@
 # Bilibili-banned-contents-hider
- Hide banned users's contents on Bilibili. Bilibili may push contents created from the users in your blacklist, this script is used to remove those contents.
+ Hide content from banned users on Bilibili. Bilibili may push content created by blacklisted users, this script is used to remove them.
 
 
-This js can be used on tampermonkey.
+This JavaScript file can be used in Tampermonkey.
+
+## Range of affected URLs
+
+|Description|URL|Affected Class Name|
+|--|--|--|
+|Main page (主页)|https://www.bilibili.com/|.feed-card, .bili-video-card|
+|Popular (入站必刷)|https://www.bilibili.com/v/popular/history|.video-card|
+|Rank (排行榜)|https://www.bilibili.com/v/popular/rank/all|.rank-item|
