@@ -11,7 +11,7 @@ This JavaScript file can be used in Tampermonkey.
 |Main Page (主页)|https://www.bilibili.com/ or https://www.bilibili.com/?*|.feed-card, .bili-video-card, .bili-video-card.is-rcmd[class="bili-video-card is-rcmd"]|
 |Popular (入站必刷)|https://www.bilibili.com/v/popular/history*|.video-card|
 |Rank (排行榜)|https://www.bilibili.com/v/popular/rank/all*|.rank-item|
-|Video (视频页)|https://www.bilibili.com/video/*|.video-page-operator-card-small, .video-card-ad-small|
+|Video (视频页)|https://www.bilibili.com/video/*|.video-page-operator-card-small, .video-card-ad-small, .video-page-game-card-small|
 
 # Updates
 
