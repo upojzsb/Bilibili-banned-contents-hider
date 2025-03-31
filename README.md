@@ -8,12 +8,17 @@ This JavaScript file can be used in Tampermonkey.
 
 |Description|URL|Affected Class Name|
 |--|--|--|
-|Main Page (主页)|https://www.bilibili.com/ or https://www.bilibili.com/?*|.feed-card, .bili-video-card|
+|Main Page (主页)|https://www.bilibili.com/ or https://www.bilibili.com/?*|.feed-card, .bili-video-card, .bili-video-card.is-rcmd[class="bili-video-card is-rcmd"]|
 |Popular (入站必刷)|https://www.bilibili.com/v/popular/history*|.video-card|
 |Rank (排行榜)|https://www.bilibili.com/v/popular/rank/all*|.rank-item|
-|Video (视频页)|https://www.bilibili.com/video/*|.video-page-operator-card-small|
+|Video (视频页)|https://www.bilibili.com/video/*|.video-page-operator-card-small, .video-card-ad-small|
 
 # Updates
+
+- V0.3
+  Support remove promotion and advertisement contents on **Main Page**;
+  
+  Support remove advertisement contents on **Video**.
 
 - V0.2
 
