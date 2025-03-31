@@ -2,9 +2,9 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.3.2
-// @description  Hide banned users' contents on Bilibili. Bilibili may push contents created from the users in your blacklist, this script is used to remove those contents.
-// @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容
+// @version      V0.3.3
+// @description  Hide banned users' contents on Bilibili. Bilibili may push contents created from the users in your blacklist, this script is used to remove those contents. Promotions and advertisements will also be removed
+// @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
 // @match        *://*.bilibili.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
@@ -97,9 +97,41 @@ async function runScript(){
     }
   }
 
+  // Remove promotion and advertisements
+  async function advertisementDelete() {
+    const currentUrl = window.location.href;
 
+    if (currentUrl.startsWith('https://www.bilibili.com/')) {
+
+      if (currentUrl === 'https://www.bilibili.com/' || currentUrl.startsWith('https://www.bilibili.com/?')) { // On the main page
+        // Remove promotional videos
+        const ad_cards = document.querySelectorAll('.bili-video-card.is-rcmd[class="bili-video-card is-rcmd"]');
+
+        console.log('Advertisement cards found:', ad_cards);
+        ad_cards.forEach((card)=>{
+          card.remove();
+        });
+      } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
+
+        // Remove ad
+        const ad_cards = document.querySelectorAll('.video-card-ad-small, .video-page-game-card-small');
+
+        console.log('Advertisement cards found:', ad_cards);
+        ad_cards.forEach((card)=>{
+          card.remove();
+        });
+      } else { // URL not yet implemented
+
+      }
+    }
+  }
+
+
+  // Since the progress of loading blacklist is slow, we can perform the pre-delete ads here
+  await advertisementDelete();
+  
   // This script would run every interval miliseconds in order to handle the AJAX request
-  var interval = 3000;
+  var interval = 1000;
 
   // Get the blacklist
   const blacklist = await getBlacklist();
@@ -107,18 +139,20 @@ async function runScript(){
   const blacklistName = blacklist.name;
   console.log('Get blacklist successfully, blacklist=', blacklistMid);
 
-
   // Run every interval milliseconds
   window.setInterval(async () => {
 
     const currentUrl = window.location.href;
 
+    // Delete the advertise cards in advance
+    await advertisementDelete();
+
+    // Prefix judgement
     if (currentUrl.startsWith('https://www.bilibili.com/')) {
 
       if (currentUrl === 'https://www.bilibili.com/' || currentUrl.startsWith('https://www.bilibili.com/?')) { // On the main page
 
         const cards = document.querySelectorAll('.feed-card, .bili-video-card');
-        // const cards = document.querySelectorAll('.bili-video-card__info--bottom');
 
         console.log('Cards found: ', cards);
 
@@ -130,21 +164,11 @@ async function runScript(){
           if (blacklistMid.some((userId) => content.includes(userId.toString()))) {
             console.log('Removing: ', card);
             card.remove();
-            // card.parentNode.parentNode.parentNode.parentNode.remove();
           }
-        });
-
-        // Remove promotional videos
-        const ad_cards = document.querySelectorAll('.bili-video-card.is-rcmd[class="bili-video-card is-rcmd"]');
-
-        console.log('Advertisement cards found:', ad_cards);
-        ad_cards.forEach((card)=>{
-          card.remove();
         });
 
       } else if (currentUrl.startsWith('https://www.bilibili.com/v/popular/history')) {
 
-        // const cards = document.querySelectorAll('.video-card');
         const cards = document.querySelectorAll('.up-name');
 
 
@@ -158,17 +182,13 @@ async function runScript(){
           // Check if the content includes any banned user name
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 3);
-            //console.log('Removing: ', card.parentNode.parentNode.parentNode);
             console.log('Removing: ', cardToBeRemoved);
-            // card.remove();
-            // card.parentNode.parentNode.parentNode.remove();
             cardToBeRemoved.remove();
           }
         });
 
       } else if (currentUrl.startsWith('https://www.bilibili.com/v/popular/rank/all')) {
 
-        // const cards = document.querySelectorAll('.video-card');
         const cards = document.querySelectorAll('.up-name');
 
 
@@ -183,9 +203,7 @@ async function runScript(){
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 5);
 
-            // console.log('Removing: ', card.parentNode.parentNode.parentNode.parentNode.parentNode);
             console.log('Removing: ', cardToBeRemoved);
-            // card.remove();
             cardToBeRemoved.remove();
           }
         });       
@@ -204,20 +222,11 @@ async function runScript(){
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 3);
 
-            // console.log('Removing: ', card.parentNode.parentNode.parentNode);
             console.log('Removing: ', cardToBeRemoved);
-            // card.remove();
             cardToBeRemoved.remove();
           }
         });
 
-        // Remove ad
-        const ad_cards = document.querySelectorAll('.video-card-ad-small, .video-page-game-card-small');
-
-        console.log('Advertisement cards found:', ad_cards);
-        ad_cards.forEach((card)=>{
-          card.remove();
-        });
       } else { // URL not yet implemented
         console.log('Contents hiding not implemented on ', currentUrl);
         console.log('Please post the information as an issue on https://github.com/upojzsb/Bilibili-banned-contents-hider');
