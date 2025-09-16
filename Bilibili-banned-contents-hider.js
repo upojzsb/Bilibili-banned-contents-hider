@@ -111,7 +111,7 @@ async function runScript(){
         ad_cards.forEach((card)=>{
           card.remove();
         });
-      } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
+      } /*else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
 
         // Remove ad
         const ad_cards = document.querySelectorAll('.video-card-ad-small, .video-page-game-card-small');
@@ -120,17 +120,17 @@ async function runScript(){
         ad_cards.forEach((card)=>{
           card.remove();
         });
-      } else { // URL not yet implemented
+      }*/ else { // URL not yet implemented
 
       }
     }
   }
 
 
-  // Since the progress of loading blacklist is slow, we can perform the pre-delete ads here
+  // Since the progress of loading the blacklist is slow, we can perform the pre-delete ads here
   await advertisementDelete();
   
-  // This script would run every interval miliseconds in order to handle the AJAX request
+  // This script would run every interval milliseconds to handle the AJAX request
   var interval = 1000;
 
   // Get the blacklist
@@ -144,7 +144,7 @@ async function runScript(){
 
     const currentUrl = window.location.href;
 
-    // Delete the advertise cards in advance
+    // Delete the advertisement cards in advance
     await advertisementDelete();
 
     // Prefix judgement
@@ -156,7 +156,7 @@ async function runScript(){
 
         console.log('Cards found: ', cards);
 
-        // Remove feed cards with banned users
+        // Remove feed cards with banned user
         cards.forEach((card) => {
           const content = card.textContent || card.innerText;
 
@@ -175,7 +175,7 @@ async function runScript(){
         console.log(currentUrl);
         console.log('Cards found: ', cards);
 
-        // Remove feed cards with banned users, No mid is displayed in the html, so use user name instead
+        // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
         cards.forEach((card) => {
           const content = card.textContent || card.innerText;
 
@@ -195,7 +195,7 @@ async function runScript(){
         console.log(currentUrl);
         console.log('Cards found: ', cards);
 
-        // Remove feed cards with banned users, No mid is displayed in the html, so use user name instead
+        // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
         cards.forEach((card) => {
           const content = card.textContent || card.innerText;
 
@@ -208,13 +208,13 @@ async function runScript(){
           }
         });       
 
-      }/* else if (currentUrl.startsWith('https://www.bilibili.com/video/')) {
+      } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) {
         const cards = document.querySelectorAll('.upname');
 
         console.log(currentUrl);
         console.log('Cards found: ', cards);
 
-        // Remove feed cards with banned users, No mid is displayed in the html, so use user name instead
+        // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
         cards.forEach((card) => {
           const content = card.textContent || card.innerText;
 
@@ -227,7 +227,7 @@ async function runScript(){
           }
         });
 
-      }*/ else { // URL not yet implemented
+      } else { // URL not yet implemented
         console.log('Contents hiding not implemented on ', currentUrl);
         console.log('Please post the information as an issue on https://github.com/upojzsb/Bilibili-banned-contents-hider');
       }
