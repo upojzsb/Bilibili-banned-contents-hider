@@ -16,16 +16,18 @@ This JavaScript file can be used in Tampermonkey.
 # Updates
 
 - V0.3
-  Support remove promotion and advertisement contents on **Main Page**;
+  Support removing promotion and advertisement contents on the **Main Page**;
   
-  Support remove advertisement contents on **Video**.
+  // Support removing advertisement contents on **Video**.
+
+  // Remove support for **Video** page bacause of kinda bugs.
 
 - V0.2
 
-  Support remove contents on **Video**;
+  Support removing contents on **Video**;
 
-  Repeatedly run the script in order to handle AJAX requests.
+  Repeatedly run the script to handle AJAX requests.
 
 - V0.1 (2024-01-11)
 
-  Init version, support remove contents on **Main page**, **Popular**, **Rank**.
+  Initial version, support removing contents on **Main page**, **Popular**, and **Rank**.
