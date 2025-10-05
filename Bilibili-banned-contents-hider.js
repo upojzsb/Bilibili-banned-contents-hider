@@ -2,7 +2,7 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.3.5
+// @version      V0.3.6
 // @description  Hide banned users' contents on Bilibili. Bilibili may push content created by users from your blacklist. This script is used to remove those contents. Promotions and advertisements will also be removed
 // @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
@@ -12,7 +12,7 @@
 // ==/UserScript==
 
 'use strict';
-async function runScript(){
+async function runScript() {
   // Return its n-th parentNode
   function returnNthParent(card, n) {
     if (n === 0) {
@@ -24,18 +24,25 @@ async function runScript(){
 
   // Get the blacklist with mid and name
   async function getBlacklist() {
-    var baseUrl = "https://api.bilibili.com/x/relation/blacks?re_version=0&pn=1&ps=20&jsonp=jsonp";
-    var totalBannedUserNumber;
     const blacklist = [];
     const blacklistName = [];
+    let jsonData;
 
-    // Get the total number of banned users
-    const jsonData = await fetchDataJson(baseUrl);
-    if (jsonData.code !== undefined && jsonData.code !== 0) {
-      throw new Error(`Error code: ${jsonData.code}, Message: ${jsonData.message}`);
+    try {
+      const baseUrl = "https://api.bilibili.com/x/relation/blacks?re_version=0&pn=1&ps=20&jsonp=jsonp";
+      jsonData = await fetchDataJson(baseUrl);
+    } catch (error) {
+      console.warn(`Warning: Could not fetch Bilibili blacklist. Reason: ${error.message}`);
+      // Return the empty lists immediately to prevent the script from crashing.
+      return {
+        mid: [],
+        name: []
+      };
     }
 
-    if (jsonData.data && jsonData.data.total !== undefined) { // Check if the 'total' property exists in the 'data' object
+    // This code only runs if the try block succeeds
+    var totalBannedUserNumber;
+    if (jsonData.data && jsonData.data.total !== undefined) {
       totalBannedUserNumber = jsonData.data.total;
     }
 
@@ -64,37 +71,33 @@ async function runScript(){
 
   // use GET method to get a json from given API
   async function fetchDataJson(url) {
-    try {
-      const response = await fetch(url, {
-        method: 'GET',
-        credentials: 'include', // Include credentials (cookies) in the request
-        headers: {
-          'Accept': '*/*',
-          'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
-          'DNT': '1',
-          'Origin': 'https://account.bilibili.com',
-          'Referer': 'https://account.bilibili.com/',
-          'Sec-Fetch-Dest': 'empty',
-          'Sec-Fetch-Mode': 'cors',
-          'Sec-Fetch-Site': 'same-site',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        },
-      });
+    const response = await fetch(url, {
+      method: 'GET',
+      credentials: 'include', // Include credentials (cookies) in the request
+      headers: {
+        'Accept': '*/*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+        'DNT': '1',
+        'Origin': 'https://account.bilibili.com',
+        'Referer': 'https://account.bilibili.com/',
+        'Sec-Fetch-Dest': 'empty',
+        'Sec-Fetch-Mode': 'cors',
+        'Sec-Fetch-Site': 'same-site',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      },
+    });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const jsonData = await response.json();
-
-      if (jsonData.code !== undefined && jsonData.code !== 0) {
-        throw new Error(`Error code: ${jsonData.code}, Message: ${jsonData.message}`);
-      }
-
-      return jsonData;
-    } catch (error) {
-      console.error('Error fetching data:', error.message);
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
+
+    const jsonData = await response.json();
+
+    if (jsonData.code !== undefined && jsonData.code !== 0) {
+      throw new Error(`Bilibili API Error! Code: ${jsonData.code}, Message: ${jsonData.message}`);
+    }
+
+    return jsonData;
   }
 
   // Remove promotion and advertisements
@@ -108,7 +111,7 @@ async function runScript(){
         const ad_cards = document.querySelectorAll('.bili-video-card.is-rcmd[class="bili-video-card is-rcmd"]');
 
         console.log('Advertisement cards found:', ad_cards);
-        ad_cards.forEach((card)=>{
+        ad_cards.forEach((card) => {
           card.remove();
         });
       } /*else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
@@ -129,7 +132,7 @@ async function runScript(){
 
   // Since the progress of loading the blacklist is slow, we can perform the pre-delete ads here
   await advertisementDelete();
-  
+
   // This script would run every interval milliseconds to handle the AJAX request
   var interval = 1000;
 
@@ -156,7 +159,7 @@ async function runScript(){
 
         console.log('Cards found: ', cards);
 
-        // Remove feed cards with banned user
+        // Remove feed cards with banned users
         cards.forEach((card) => {
           const content = card.textContent || card.innerText;
 
@@ -206,7 +209,7 @@ async function runScript(){
             console.log('Removing: ', cardToBeRemoved);
             cardToBeRemoved.remove();
           }
-        });       
+        });
 
       } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) {
         const cards = document.querySelectorAll('.upname');
