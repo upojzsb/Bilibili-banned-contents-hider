@@ -242,6 +242,9 @@ async function runScript() {
     hideBlacklistedContent();
   }
 
+  // Remove advertisement in advance since the loading of blacklist may take some time
+  advertisementDelete();
+
   // Get the blacklist
   const blacklist = await getBlacklist();
   const blacklistMid = blacklist.mid;
