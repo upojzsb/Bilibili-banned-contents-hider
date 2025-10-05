@@ -1,8 +1,10 @@
 # Bilibili-banned-contents-hider
 
-Hide contents from banned users on Bilibili. Bilibili may push content created by blacklisted users, this script is used to remove them.
+This script hides content from users on your Bilibili blacklist. Since Bilibili sometimes pushes content from blacklisted users, this script ensures it gets removed.
 
-This JavaScript file can be used in Tampermonkey.
+Requires a userscript manager (like [Tampermonkey](https://www.tampermonkey.net/)) to run. It uses a local cache to ensure your blocks are always active.
+
+You can install the script from [Greasy Fork](https://greasyfork.org/en/scripts/484601-bilibili-banned-contents-hider).
 
 # Range of affected URLs
 
@@ -15,19 +17,20 @@ This JavaScript file can be used in Tampermonkey.
 
 # Updates
 
-- V0.3
-  Support removing promotion and advertisement contents on the **Main Page**;
+- V0.4
   
-  // Support removing advertisement contents on **Video**.
+  Caches the blacklist locally, falling back to it when the API is unreachable.
 
-  // Remove support for **Video** page bacause of kinda bugs.
+- V0.3
+  
+  Added removal of promotions and ads on the **Main Page**.
+  (Support for the **Video** page was temporarily removed due to bugs).
 
 - V0.2
-
   Support removing contents on **Video**;
-
+  
   Repeatedly run the script to handle AJAX requests.
 
 - V0.1 (2024-01-11)
-
+  
   Initial version, support removing contents on **Main page**, **Popular**, and **Rank**.

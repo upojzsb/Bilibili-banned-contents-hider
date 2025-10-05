@@ -2,13 +2,15 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.3.6
+// @version      V0.4.0
 // @description  Hide banned users' contents on Bilibili. Bilibili may push content created by users from your blacklist. This script is used to remove those contents. Promotions and advertisements will also be removed
 // @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
 // @match        *://*.bilibili.com/*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=greasyfork.org
 // @license      GPL-3.0
+// @grant        GM_getValue
+// @grant        GM_setValue
 // ==/UserScript==
 
 'use strict';
@@ -24,49 +26,55 @@ async function runScript() {
 
   // Get the blacklist with mid and name
   async function getBlacklist() {
-    const blacklist = [];
-    const blacklistName = [];
-    let jsonData;
+    const CACHE_KEY = 'bilibili_blacklist_cache'; // Define a key for our storage
 
     try {
+      // Step 1: Try to fetch from Bilibili API
+      console.log('Attempting to fetch latest blacklist from Bilibili...');
+
+      // Since the total number of banned users appears in the first page of the API response, we fetch it first to calculate how many pages we need to fetch Each page contains 20 users
       const baseUrl = "https://api.bilibili.com/x/relation/blacks?re_version=0&pn=1&ps=20&jsonp=jsonp";
-      jsonData = await fetchDataJson(baseUrl);
-    } catch (error) {
-      console.warn(`Warning: Could not fetch Bilibili blacklist. Reason: ${error.message}`);
-      // Return the empty lists immediately to prevent the script from crashing.
-      return {
-        mid: [],
-        name: []
-      };
-    }
+      let jsonData = await fetchDataJson(baseUrl);
 
-    // This code only runs if the try block succeeds
-    var totalBannedUserNumber;
-    if (jsonData.data && jsonData.data.total !== undefined) {
-      totalBannedUserNumber = jsonData.data.total;
-    }
+      const blacklist = [];
+      const blacklistName = [];
 
-    // Count how total page number
-    var totalPageNumber = Math.ceil(totalBannedUserNumber / 20);
+      const totalBannedUserNumber = jsonData.data.total;
+      const totalPageNumber = Math.ceil(totalBannedUserNumber / 20);
 
-    // Get infos page by page
-    for (let i = 1; i <= totalPageNumber; i++) { // i belongs to 1->totalPageNumber, both are included
-      var url = `https://api.bilibili.com/x/relation/blacks?re_version=0&pn=${i}&ps=20&jsonp=jsonp`;
-      const jsonData = await fetchDataJson(url);
-
-      // For loop in each banned user item
-      const itemList = jsonData.data.list
-
-      for (const item of itemList) {
-        blacklist.push(item.mid);
-        blacklistName.push(item.uname);
+      for (let i = 1; i <= totalPageNumber; i++) {
+        const url = `https://api.bilibili.com/x/relation/blacks?re_version=0&pn=${i}&ps=20&jsonp=jsonp`;
+        jsonData = await fetchDataJson(url);
+        const itemList = jsonData.data.list;
+        for (const item of itemList) {
+          blacklist.push(item.mid);
+          blacklistName.push(item.uname);
+        }
       }
-    }
 
-    return {
-      mid: blacklist,
-      name: blacklistName
-    };
+      const freshBlacklist = { mid: blacklist, name: blacklistName };
+
+      // Step 2: Fetch successful, update local data
+      console.log('Successfully fetched blacklist. Updating local cache.');
+      await GM_setValue(CACHE_KEY, freshBlacklist); // Save the fresh data
+
+      return freshBlacklist;
+    } catch (error) {
+      // Step 3: Fetch failed, use local data instead
+      console.warn(`Could not fetch blacklist from Bilibili: ${error.message}`);
+      console.log('Falling back to locally stored blacklist cache.');
+
+      // Retrieve the cached data. If it doesn't exist, default to empty lists.
+      const cachedBlacklist = await GM_getValue(CACHE_KEY, { mid: [], name: [] });
+
+      if (cachedBlacklist.mid.length > 0) {
+        console.log(`Successfully loaded ${cachedBlacklist.mid.length} users from cache.`);
+      } else {
+        console.warn('No cached blacklist found. Hiding will not be active.');
+      }
+
+      return cachedBlacklist;
+    }
   }
 
   // use GET method to get a json from given API
