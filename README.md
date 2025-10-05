@@ -27,6 +27,7 @@ You can install the script from [Greasy Fork](https://greasyfork.org/en/scripts/
   (Support for the **Video** page was temporarily removed due to bugs).
 
 - V0.2
+
   Support removing contents on **Video**;
   
   Repeatedly run the script to handle AJAX requests.
