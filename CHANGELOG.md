@@ -7,6 +7,9 @@ This changelog summarizes the most significant updates for each major revision. 
 ---
 
 ## V0.5
+### Added
+- Expanded ad-blocking on the **Video** page to cover more promotion types.
+
 ### Changed
 - Replaced the inefficient periodic scan (`setInterval`) with a modern `MutationObserver` for vastly improved performance and responsiveness.
 

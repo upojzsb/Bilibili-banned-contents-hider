@@ -2,7 +2,7 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.5.0
+// @version      V0.5.1
 // @description  Hide banned users' contents on Bilibili. Bilibili may push content created by users from your blacklist. This script is used to remove those contents. Promotions and advertisements will also be removed
 // @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
@@ -124,7 +124,7 @@ async function runScript() {
       } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
 
         // Remove ad
-        const ad_cards = document.querySelectorAll('.video-card-ad-small, .video-page-game-card-small');
+        const ad_cards = document.querySelectorAll('.video-card-ad-small, .video-page-game-card-small, .video-page-special-card-small');
 
         console.debug('Advertisement cards found:', ad_cards);
         ad_cards.forEach((card)=>{
