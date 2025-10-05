@@ -2,7 +2,7 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.4.0
+// @version      V0.5.0
 // @description  Hide banned users' contents on Bilibili. Bilibili may push content created by users from your blacklist. This script is used to remove those contents. Promotions and advertisements will also be removed
 // @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
@@ -30,7 +30,7 @@ async function runScript() {
 
     try {
       // Step 1: Try to fetch from Bilibili API
-      console.log('Attempting to fetch latest blacklist from Bilibili...');
+      console.debug('Attempting to fetch latest blacklist from Bilibili...');
 
       // Since the total number of banned users appears in the first page of the API response, we fetch it first to calculate how many pages we need to fetch Each page contains 20 users
       const baseUrl = "https://api.bilibili.com/x/relation/blacks?re_version=0&pn=1&ps=20&jsonp=jsonp";
@@ -55,20 +55,19 @@ async function runScript() {
       const freshBlacklist = { mid: blacklist, name: blacklistName };
 
       // Step 2: Fetch successful, update local data
-      console.log('Successfully fetched blacklist. Updating local cache.');
+      console.debug('Successfully fetched blacklist. Updating local cache.');
       await GM_setValue(CACHE_KEY, freshBlacklist); // Save the fresh data
 
       return freshBlacklist;
-    } catch (error) {
-      // Step 3: Fetch failed, use local data instead
+    } catch (error) { // Fetch failed, use local data instead
       console.warn(`Could not fetch blacklist from Bilibili: ${error.message}`);
-      console.log('Falling back to locally stored blacklist cache.');
+      console.debug('Falling back to locally stored blacklist cache.');
 
       // Retrieve the cached data. If it doesn't exist, default to empty lists.
       const cachedBlacklist = await GM_getValue(CACHE_KEY, { mid: [], name: [] });
 
       if (cachedBlacklist.mid.length > 0) {
-        console.log(`Successfully loaded ${cachedBlacklist.mid.length} users from cache.`);
+        console.debug(`Successfully loaded ${cachedBlacklist.mid.length} users from cache.`);
       } else {
         console.warn('No cached blacklist found. Hiding will not be active.');
       }
@@ -109,7 +108,7 @@ async function runScript() {
   }
 
   // Remove promotion and advertisements
-  async function advertisementDelete() {
+  function advertisementDelete() {
     const currentUrl = window.location.href;
 
     if (currentUrl.startsWith('https://www.bilibili.com/')) {
@@ -118,45 +117,29 @@ async function runScript() {
         // Remove promotional videos
         const ad_cards = document.querySelectorAll('.bili-video-card.is-rcmd[class="bili-video-card is-rcmd"]');
 
-        console.log('Advertisement cards found:', ad_cards);
+        console.debug('Advertisement cards found:', ad_cards);
         ad_cards.forEach((card) => {
-          card.remove();
+          card.style.display = 'none'; 
         });
-      } /*else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
+      } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
 
         // Remove ad
         const ad_cards = document.querySelectorAll('.video-card-ad-small, .video-page-game-card-small');
 
-        console.log('Advertisement cards found:', ad_cards);
+        console.debug('Advertisement cards found:', ad_cards);
         ad_cards.forEach((card)=>{
-          card.remove();
+          // Simply remove it will cause race condition problem
+          card.style.display = 'none';
         });
-      }*/ else { // URL not yet implemented
+      } else { // URL not yet implemented
 
       }
     }
   }
 
-
-  // Since the progress of loading the blacklist is slow, we can perform the pre-delete ads here
-  await advertisementDelete();
-
-  // This script would run every interval milliseconds to handle the AJAX request
-  var interval = 1000;
-
-  // Get the blacklist
-  const blacklist = await getBlacklist();
-  const blacklistMid = blacklist.mid;
-  const blacklistName = blacklist.name;
-  console.log('Get blacklist successfully, blacklist=', blacklistMid);
-
-  // Run every interval milliseconds
-  window.setInterval(async () => {
-
+  // Remove contents created by banned users
+  function hideBlacklistedContent() {
     const currentUrl = window.location.href;
-
-    // Delete the advertisement cards in advance
-    await advertisementDelete();
 
     // Prefix judgement
     if (currentUrl.startsWith('https://www.bilibili.com/')) {
@@ -165,7 +148,7 @@ async function runScript() {
 
         const cards = document.querySelectorAll('.feed-card, .bili-video-card');
 
-        console.log('Cards found: ', cards);
+        console.debug('Cards found: ', cards);
 
         // Remove feed cards with banned users
         cards.forEach((card) => {
@@ -173,8 +156,8 @@ async function runScript() {
 
           // Check if the content includes any banned user ID
           if (blacklistMid.some((userId) => content.includes(userId.toString()))) {
-            console.log('Removing: ', card);
-            card.remove();
+            console.debug('Removing: ', card);
+            card.style.display = 'none'; 
           }
         });
 
@@ -183,8 +166,8 @@ async function runScript() {
         const cards = document.querySelectorAll('.up-name');
 
 
-        console.log(currentUrl);
-        console.log('Cards found: ', cards);
+        console.debug(currentUrl);
+        console.debug('Cards found: ', cards);
 
         // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
         cards.forEach((card) => {
@@ -193,8 +176,8 @@ async function runScript() {
           // Check if the content includes any banned user name
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 3);
-            console.log('Removing: ', cardToBeRemoved);
-            cardToBeRemoved.remove();
+            console.debug('Removing: ', cardToBeRemoved);
+            cardToBeRemoved.style.display = 'none'; 
           }
         });
 
@@ -203,8 +186,8 @@ async function runScript() {
         const cards = document.querySelectorAll('.up-name');
 
 
-        console.log(currentUrl);
-        console.log('Cards found: ', cards);
+        console.debug(currentUrl);
+        console.debug('Cards found: ', cards);
 
         // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
         cards.forEach((card) => {
@@ -214,16 +197,16 @@ async function runScript() {
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 5);
 
-            console.log('Removing: ', cardToBeRemoved);
-            cardToBeRemoved.remove();
+            console.debug('Removing: ', cardToBeRemoved);
+            cardToBeRemoved.style.display = 'none';
           }
         });
 
       } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) {
         const cards = document.querySelectorAll('.upname');
 
-        console.log(currentUrl);
-        console.log('Cards found: ', cards);
+        console.debug(currentUrl);
+        console.debug('Cards found: ', cards);
 
         // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
         cards.forEach((card) => {
@@ -233,20 +216,57 @@ async function runScript() {
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 3);
 
-            console.log('Removing: ', cardToBeRemoved);
-            cardToBeRemoved.remove();
+            console.debug('Removing: ', cardToBeRemoved);
+            cardToBeRemoved.style.display = 'none';
           }
         });
 
       } else { // URL not yet implemented
-        console.log('Contents hiding not implemented on ', currentUrl);
-        console.log('Please post the information as an issue on https://github.com/upojzsb/Bilibili-banned-contents-hider');
+        if (currentUrl !== lastWarnedUrl) {
+          console.warn('Contents hiding not implemented on ', currentUrl);
+          console.warn('Please post the information as an issue on https://github.com/upojzsb/Bilibili-banned-contents-hider');
+          lastWarnedUrl = currentUrl;
+        }
       }
     } else { // Url not start with ('https://www.bilibili.com/')
-      console.log('Bilibili-banned-contents-hider may not run here: ', currentUrl);
+      if (currentUrl !== lastWarnedUrl) {
+        console.warn('Bilibili-banned-contents-hider may not run here: ', currentUrl);
+        lastWarnedUrl = currentUrl;
+      }
     }
+  }
 
-  }, interval);
+  // The entry-point function that runs all scanning logic.
+  function runFullScan() {
+    advertisementDelete();
+    hideBlacklistedContent();
+  }
+
+  // Get the blacklist
+  const blacklist = await getBlacklist();
+  const blacklistMid = blacklist.mid;
+  const blacklistName = blacklist.name;
+  console.debug('Get blacklist successfully, blacklist=', blacklistMid);
+
+  // A flag to prevent repeated warnings for the same URL.
+  let lastWarnedUrl = ''; 
+
+  // Run the main hiding function once on initial load.
+  runFullScan();
+
+  // Set up the MutationObserver to handle dynamically loaded content.
+  let debounceTimer;
+  const observer = new MutationObserver(() => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(runFullScan, 250);
+  });
+
+  // Start watching the entire page for any changes to the element list.
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
 }
 
 runScript();
