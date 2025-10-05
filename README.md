@@ -17,31 +17,4 @@ You can install the script from [Greasy Fork](https://greasyfork.org/en/scripts/
 
 # Changelog
 
-- V0.5
-
-  Replaced the periodic scan with a MutationObserver for vastly improved performance.
-
-- V0.4
-  
-  Added a local blacklist cache for improved reliability when the API is down.
-
-  Fixed critical bugs and improved stability by safely hiding content (set `card.style.display = 'none';`) instead of removing it. 
-
-  Cleaned up the browser console for a better user experience.
-
-
-- V0.3
-  
-  Added removal of promotions and ads on the **Main Page**.
-
-  ~~(Support for the **Video** page was temporarily removed due to bugs).~~
-
-- V0.2
-
-  Support removing contents on **Video**;
-  
-  ~~Repeatedly run the script to handle AJAX requests.~~
-
-- V0.1 (2024-01-11)
-  
-  Initial version, support removing contents on **Main page**, **Popular**, and **Rank**.
+For a detailed list of changes, please see the [CHANGELOG.md](CHANGELOG.md) file.
