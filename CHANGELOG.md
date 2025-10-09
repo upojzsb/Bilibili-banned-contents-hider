@@ -10,6 +10,9 @@ This changelog summarizes the most significant updates for each major revision. 
 ### Added
 - Expanded ad-blocking on the **Video** page to cover more promotion types.
 
+### Fixed
+- Fixed a database write race condition that occurred when opening multiple Bilibili tabs. For simplicity and to ensure data is always up-to-date, the script now only writes to the database after checking for content changes, avoiding the use of timestamps or locks.
+
 ### Changed
 - Replaced the inefficient periodic scan (`setInterval`) with a modern `MutationObserver` for vastly improved performance and responsiveness.
 

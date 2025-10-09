@@ -2,7 +2,7 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.5.1
+// @version      V0.5.2
 // @description  Hide banned users' contents on Bilibili. Bilibili may push content created by users from your blacklist. This script is used to remove those contents. Promotions and advertisements will also be removed
 // @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
@@ -55,8 +55,18 @@ async function runScript() {
       const freshBlacklist = { mid: blacklist, name: blacklistName };
 
       // Step 2: Fetch successful, update local data
-      console.debug('Successfully fetched blacklist. Updating local cache.');
-      await GM_setValue(CACHE_KEY, freshBlacklist); // Save the fresh data
+      // Read current cache
+      const cachedData = await GM_getValue(CACHE_KEY);
+
+      // Compare the fetched data with the cached data.
+      // Use JSON.stringify for a simple and effective deep comparison.
+      if (cachedData && JSON.stringify(cachedData) === JSON.stringify(freshBlacklist)) {
+          console.debug('Fetched data is identical to the local cache. No update needed.');
+      } else {
+          // The data is different or the cache is empty, so we write the new data.
+          console.debug('Blacklist has changed or cache is empty. Updating local storage.');
+          await GM_setValue(CACHE_KEY, freshBlacklist);
+      }
 
       return freshBlacklist;
     } catch (error) { // Fetch failed, use local data instead
