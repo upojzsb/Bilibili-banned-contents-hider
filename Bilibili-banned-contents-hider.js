@@ -2,7 +2,7 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.5.2
+// @version      V0.5.3
 // @description  Hide banned users' contents on Bilibili. Bilibili may push content created by users from your blacklist. This script is used to remove those contents. Promotions and advertisements will also be removed
 // @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
@@ -155,7 +155,7 @@ async function runScript() {
     if (currentUrl.startsWith('https://www.bilibili.com/')) {
 
       if (currentUrl === 'https://www.bilibili.com/' || currentUrl.startsWith('https://www.bilibili.com/?')) { // On the main page
-
+        // Feed cards
         const cards = document.querySelectorAll('.feed-card, .bili-video-card');
 
         console.debug('Cards found: ', cards);
@@ -167,6 +167,21 @@ async function runScript() {
           // Check if the content includes any banned user ID
           if (blacklistMid.some((userId) => content.includes(userId.toString()))) {
             console.debug('Removing: ', card);
+            card.style.display = 'none'; 
+          }
+        });
+
+        // Floor cards
+        const cards_floor = document.querySelectorAll('.floor-single-card');
+
+        console.debug('Floor cards found: ', cards_floor);
+
+        // Remove floor cards with banned users, the username is displayed instead of mid
+        cards_floor.forEach((card) => {
+          const content = card.textContent || card.innerText;
+          // Check if the content includes any banned user ID
+          if (blacklistName.some((userId) => content.includes(userId.toString()))) {
+            console.debug('Removing: floor card: ', card);
             card.style.display = 'none'; 
           }
         });

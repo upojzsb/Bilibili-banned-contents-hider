@@ -9,6 +9,7 @@ This changelog summarizes the most significant updates for each major revision. 
 ## V0.5
 ### Added
 - Expanded ad-blocking on the **Video** page to cover more promotion types.
+- Expanded content blocking to the **floor card** recommendations on the **Main** Page.
 
 ### Fixed
 - Fixed a database write race condition that occurred when opening multiple Bilibili tabs. For simplicity and to ensure data is always up-to-date, the script now only writes to the database after checking for content changes, avoiding the use of timestamps or locks.
