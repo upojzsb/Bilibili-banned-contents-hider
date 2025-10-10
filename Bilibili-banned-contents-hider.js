@@ -2,7 +2,7 @@
 // @name         Bilibili-banned-contents-hider
 // @name:zh-CN   移除Bilibili黑名单用户的创作内容
 // @namespace    https://github.com/upojzsb/Bilibili-banned-contents-hider
-// @version      V0.5.3
+// @version      V0.6.0
 // @description  Hide banned users' contents on Bilibili. Bilibili may push content created by users from your blacklist. This script is used to remove those contents. Promotions and advertisements will also be removed
 // @description:zh-CN 隐藏Bilibili黑名单用户的内容。Bilibiil可能会推送黑名单用户创作的内容，该脚本旨在移除这些内容，广告及推广内容也将被移除
 // @author       UPO-JZSB
@@ -16,12 +16,12 @@
 'use strict';
 async function runScript() {
   // Return its n-th parentNode
-  function returnNthParent(card, n) {
-    if (n === 0) {
-      return card;
-    } else {
-      return returnNthParent(card.parentNode, n - 1);
+  function returnNthParent(element, n) {
+    let current = element;
+    for (let i = 0; i < n && current; i++) {
+      current = current.parentNode;
     }
+    return current;
   }
 
   // Get the blacklist with mid and name
@@ -117,6 +117,14 @@ async function runScript() {
     return jsonData;
   }
 
+  // Hides the element and logs the action
+  function hideElement(element, elementType = 'element') {
+    if (element && element.style.display !== 'none') {
+      console.debug(`Hiding ${elementType}:`, element);
+      element.style.display = 'none';
+    }
+  }
+
   // Remove promotion and advertisements
   function advertisementDelete() {
     const currentUrl = window.location.href;
@@ -129,7 +137,7 @@ async function runScript() {
 
         console.debug('Advertisement cards found:', ad_cards);
         ad_cards.forEach((card) => {
-          card.style.display = 'none'; 
+          hideElement(card, 'advertisement'); 
         });
       } else if (currentUrl.startsWith('https://www.bilibili.com/video/')) { // On the video page
 
@@ -139,7 +147,7 @@ async function runScript() {
         console.debug('Advertisement cards found:', ad_cards);
         ad_cards.forEach((card)=>{
           // Simply remove it will cause race condition problem
-          card.style.display = 'none';
+          hideElement(card, 'advertisement'); 
         });
       } else { // URL not yet implemented
 
@@ -152,46 +160,44 @@ async function runScript() {
     const currentUrl = window.location.href;
 
     // Prefix judgement
-    if (currentUrl.startsWith('https://www.bilibili.com/')) {
+    // Use RegExp to match all subdomains of bilibili.com
+    if (/^https:\/\/.*\.bilibili\.com/.test(currentUrl)) {
 
       if (currentUrl === 'https://www.bilibili.com/' || currentUrl.startsWith('https://www.bilibili.com/?')) { // On the main page
-        // Feed cards
-        const cards = document.querySelectorAll('.feed-card, .bili-video-card');
+        // Consolidate all card selectors for the main page
+        const cards = document.querySelectorAll('.feed-card, .bili-video-card, .floor-single-card');
 
+        console.debug('Main page cards found: ', cards);
+
+        cards.forEach((card) => {
+          const content = card.innerHTML;
+          // Check for the user's mid within the HTML content
+          if (blacklistMid.some((userId) => content.includes(userId.toString()))) {
+            hideElement(card, 'main page card');
+          }
+        });
+
+      } else if (currentUrl.startsWith('https://search.bilibili.com/all')) { // On the search result page
+        
+        const cards = document.querySelectorAll('.bili-video-card, .user-list');
+        
         console.debug('Cards found: ', cards);
 
         // Remove feed cards with banned users
         cards.forEach((card) => {
-          const content = card.textContent || card.innerText;
-
+          const content = card.innerHTML.toString();
           // Check if the content includes any banned user ID
           if (blacklistMid.some((userId) => content.includes(userId.toString()))) {
-            console.debug('Removing: ', card);
-            card.style.display = 'none'; 
+            hideElement(card, 'search result card'); 
           }
         });
 
-        // Floor cards
-        const cards_floor = document.querySelectorAll('.floor-single-card');
 
-        console.debug('Floor cards found: ', cards_floor);
-
-        // Remove floor cards with banned users, the username is displayed instead of mid
-        cards_floor.forEach((card) => {
-          const content = card.textContent || card.innerText;
-          // Check if the content includes any banned user ID
-          if (blacklistName.some((userId) => content.includes(userId.toString()))) {
-            console.debug('Removing: floor card: ', card);
-            card.style.display = 'none'; 
-          }
-        });
 
       } else if (currentUrl.startsWith('https://www.bilibili.com/v/popular/history')) {
 
         const cards = document.querySelectorAll('.up-name');
 
-
-        console.debug(currentUrl);
         console.debug('Cards found: ', cards);
 
         // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
@@ -201,8 +207,7 @@ async function runScript() {
           // Check if the content includes any banned user name
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 3);
-            console.debug('Removing: ', cardToBeRemoved);
-            cardToBeRemoved.style.display = 'none'; 
+            hideElement(cardToBeRemoved, 'history card');
           }
         });
 
@@ -210,8 +215,6 @@ async function runScript() {
 
         const cards = document.querySelectorAll('.up-name');
 
-
-        console.debug(currentUrl);
         console.debug('Cards found: ', cards);
 
         // Remove feed cards with banned users. No mid is displayed in the HTML, so use the user name instead
@@ -221,9 +224,7 @@ async function runScript() {
           // Check if the content includes any banned user name
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 5);
-
-            console.debug('Removing: ', cardToBeRemoved);
-            cardToBeRemoved.style.display = 'none';
+            hideElement(cardToBeRemoved, 'rank card');
           }
         });
 
@@ -240,9 +241,7 @@ async function runScript() {
           // Check if the content includes any banned user name
           if (blacklistName.some((userId) => content.includes(userId.toString()))) {
             const cardToBeRemoved = returnNthParent(card, 3);
-
-            console.debug('Removing: ', cardToBeRemoved);
-            cardToBeRemoved.style.display = 'none';
+            hideElement(cardToBeRemoved, 'video page card');
           }
         });
 

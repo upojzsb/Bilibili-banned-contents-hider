@@ -6,6 +6,16 @@ This changelog summarizes the most significant updates for each major revision. 
 
 ---
 
+## V0.6
+### Added
+- Content blocking support for the Search page.
+- Support for all Bilibili subdomains.
+
+### Changed
+- Improved blocking reliability on the **Main Page** by using a more robust detection method for all types of content cards.
+- Refactored core logic by abstracting the element hiding action into a reusable `hideElement` function.
+- Change to iterative approach for `returnNthParent`.
+
 ## V0.5
 ### Added
 - Expanded ad-blocking on the **Video** page to cover more promotion types.
